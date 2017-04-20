@@ -99,9 +99,9 @@ def process_camcard_row(row):
 
 
 def clear_upload_files():
-    files = os.listdir(path='UploadFiles')
+    files = os.listdir(path=config.UPLOAD_FILES_DIR)
     for f in files:
-        with open('UploadFiles/{0}'.format(f), 'w+', newline='') as _csvfile:
+        with open('{}/{}'.format(config.UPLOAD_FILES_DIR, f), 'w+', newline='') as _csvfile:
             writer = csv.DictWriter(_csvfile, CSV_HEADERS)
             writer.writeheader()
 

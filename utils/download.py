@@ -6,9 +6,12 @@ import shutil
 
 from bs4 import BeautifulSoup
 
+import config
 
-def archive_old_csvs(rootPath):
-    destDir = 'raw_data/archives'
+
+def archive_old_csvs():
+    rootPath = config.TORETA_RAW_DATA_DIR
+    destDir = config.ARCHIVES_DIR
 
     matches = []
     for root, dirnames, filenames in os.walk(rootPath):
@@ -52,7 +55,8 @@ def download_file(session, download_url, venue):
         venue=venue,
         timestamp=timestamp
     )
-    path_to_file = 'raw_data/toreta/{venue}/{filename}'.format(
+    path_to_file = '{toreta_dir}/{venue}/{filename}'.format(
+        toreta_dir=config.TORETA_RAW_DATA_DIR,
         venue=venue,
         filename=filename
     )
@@ -64,18 +68,19 @@ def download_file(session, download_url, venue):
     return path_to_file
 
 
-def login_and_download(account):
-    s = requests.Session()
+def login_and_download():
+    for account in config.TORETA_ACCOUNTS:
+        s = requests.Session()
 
-    login(
-        session=s,
-        login_url=account['login_url'],
-        email=account['email'],
-        password=account['password'],
-    )
-    print('Downloading from {}'.format(account['download_url']))
-    download_file(
-        session=s,
-        download_url=account['download_url'],
-        venue=account['venue']
-    )
+        login(
+            session=s,
+            login_url=account['login_url'],
+            email=account['email'],
+            password=account['password'],
+        )
+        print('Downloading from {}'.format(account['download_url']))
+        download_file(
+            session=s,
+            download_url=account['download_url'],
+            venue=account['venue']
+        )

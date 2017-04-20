@@ -4,16 +4,8 @@ from utils.clean import clear_upload_files, process_folder
 from utils.upload import get_lists, list_is_correct, upload_file_to_benchmark
 
 # DOWNLOAD TORETA -------------------------------------------------------------
-input_var = input((
-    'Do you want to archive old CSV files'
-    ' and download the latest ones? [y/n]: '
-))
-if input_var == 'y':
-    archive_old_csvs('raw_data/toreta')
-    for account in config.toreta_accounts:
-        login_and_download(account)
-else:
-    print('Moving on without archiving/downloading...\n')
+archive_old_csvs()
+login_and_download()
 
 # TO-DO: DOWNLOAD CAMCARD?
 # TO-DO: DEDUPLICATE - for now, let Benchmark handle the deduplication
