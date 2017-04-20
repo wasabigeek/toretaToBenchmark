@@ -11,9 +11,7 @@ login_and_download()
 # TO-DO: DEDUPLICATE - for now, let Benchmark handle the deduplication
 
 # EXTRACT AND CLEAN -----------------------------------------------------------
-# Loop through Toreta / Camcard CSVs
-# Pick out relevant columns from Toreta / Camcard
-# Map data to Benchmark Lists
+# Create upload files from Toreta and CAMCARD CSVs
 clear_upload_files()
 
 for folder in config.folder_mapping:
@@ -24,9 +22,6 @@ for folder in config.folder_mapping:
     )
 
 # IMPORT TO BENCHMARK ---------------------------------------------------------
-# Show lists before to check values
-# Push cleaned data to Benchmark API
-
 for benchmark in config.BENCHMARK:
     print('Retrieving lists for', benchmark['username'])
     retrieved_lists = get_lists(
@@ -36,16 +31,12 @@ for benchmark in config.BENCHMARK:
 
     for list_ in benchmark['lists']:
         if list_is_correct(current_list=list_, retrieved_lists=retrieved_lists):
-            upload_file_to_benchmark(
-                filepath=list_['uploadfile'],
-                listname=list_['name'],
-                listid=list_['id'],
-                username=benchmark['username'],
-                password=benchmark['password'],
-            )
+            upload_file_to_benchmark(list_, benchmark)
         else:
             print(
-                "Couldn't find list ID:", list_['id'], "| Name:", list_['name'], "Stopping...")
+                "Couldn't find list ID:", list_['id'],
+                "| Name:", list_['name'], "Stopping..."
+            )
             break
 
     get_lists(

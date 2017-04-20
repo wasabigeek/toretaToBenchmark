@@ -53,7 +53,13 @@ def list_is_correct(current_list, retrieved_lists):
     return list_is_correct
 
 
-def upload_file_to_benchmark(filepath, listname, listid, username, password):
+def upload_file_to_benchmark(list_, benchmark):
+    filepath = list_['uploadfile']
+    listname = list_['name']
+    listid = list_['id']
+    username = benchmark['username']
+    password = benchmark['password']
+
     client = BMEApi(username, password, config.BENCHMARK_APIURL)
     if not client.isLogin:
         # an error occurred while logging in
@@ -62,6 +68,7 @@ def upload_file_to_benchmark(filepath, listname, listid, username, password):
         print("Fault string: ", client.faultString)
         return
 
+    # the toreta CSVs often have characters that mess with UTF-8
     with open(filepath, newline='', encoding='Windows-1252') as _csvfile:
         contacts = list(csv.DictReader(_csvfile, delimiter=',', quotechar='"'))
 
