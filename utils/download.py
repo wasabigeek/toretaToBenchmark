@@ -1,6 +1,25 @@
-from bs4 import BeautifulSoup
 import requests
 import datetime
+import fnmatch
+import os
+import shutil
+
+from bs4 import BeautifulSoup
+
+
+def archive_old_csvs(rootPath):
+    destDir = 'raw_data/archives'
+
+    matches = []
+    for root, dirnames, filenames in os.walk(rootPath):
+        for filename in fnmatch.filter(filenames, '*.csv'):
+            matches.append(os.path.join(root, filename))
+            shutil.move(
+                os.path.join(root, filename),
+                os.path.join(destDir, filename)
+            )
+
+    print('Archiving from', rootPath, ":", matches)
 
 
 def login(session, login_url, email, password):
@@ -9,7 +28,7 @@ def login(session, login_url, email, password):
     LOGIN_URL = login_url
     response = session.get(LOGIN_URL)
 
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "html.parser")
     auth_input = soup.find(attrs={"name": "authenticity_token"})
     auth_token = auth_input.get('value')
 
@@ -25,26 +44,27 @@ def login(session, login_url, email, password):
 
 
 # download relevant CSV
-def download_file(session, download_url, folder_name):
+def download_file(session, download_url, venue):
     # NOTE the stream=True parameter
     r = session.get(download_url, stream=True)
     timestamp = datetime.datetime.now().strftime("%Y%b%d_%Hh%Mm%Ss")
-    local_filename = '{0}/customers_{1}.csv'.format(
-        folder_name,
-        timestamp
+    filename = '{venue}_toreta_{timestamp}.csv'.format(
+        venue=venue,
+        timestamp=timestamp
     )
-    with open(local_filename, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024): 
+    path_to_file = 'raw_data/toreta/{venue}/{filename}'.format(
+        venue=venue,
+        filename=filename
+    )
+    with open(path_to_file, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 # f.flush() commented by recommendation from J.F.Sebastian
-    return local_filename
+    return path_to_file
 
 
-# RUNTIME
-from secret import toreta_accounts
-
-for account in toreta_accounts:
+def login_and_download(account):
     s = requests.Session()
 
     login(
@@ -53,8 +73,9 @@ for account in toreta_accounts:
         email=account['email'],
         password=account['password'],
     )
+    print('Downloading from {}'.format(account['download_url']))
     download_file(
         session=s,
         download_url=account['download_url'],
-        folder_name=account['folder_name']
+        venue=account['venue']
     )

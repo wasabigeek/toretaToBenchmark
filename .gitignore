@@ -1,3 +1,5 @@
-secret.py
+config.py
 *.csv
 *.xlsx
+*.pyc
+utils/bme_xmlrpc_python/samples/*
